@@ -61,7 +61,7 @@ function PetCard({ pet }: Props) {
   useHotkeys([[`mod + i`, () => convertToSvg(), { preventDefault: false, usePhysicalKeys: true }]])
 
   return (
-    <div>
+    <div className="lg:block hidden">
       <Tilt rotationFactor={8} isReverse>
         <div
           ref={ref}

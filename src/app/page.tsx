@@ -92,9 +92,11 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col font-sans bg-violet-50 justify-center items-center h-dvh w-dvw">
-      <div className="grid grid-cols-2 gap-6">
-        <PetCard pet={formValues} />
+    <div className="flex flex-col font-sans bg-violet-50 justify-center items-center lg:h-dvh lg:w-dvw">
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="order-last lg:order-first">
+          <PetCard pet={formValues} />
+        </div>
         <div>
           <Alert className="mb-4" variant="destructive">
             <AlertTitle>
@@ -102,9 +104,12 @@ export default function Home() {
                 <span>🚧</span> <span>THÔNG BÁO</span>
               </div>
             </AlertTitle>
-            <AlertDescription>Website đang trong quá trình phát triển, vui lòng nhập thông tin động vật nuôi để định danh.</AlertDescription>
+            <AlertDescription>
+              Website đang trong quá trình phát triển, <span className="lg:inline-block hidden">vui lòng nhập thông tin động vật nuôi để định danh.</span>
+              <span className="inline-block lg:hidden"> hiện tại chưa hỗ trợ cho thiết bị di động.</span>
+            </AlertDescription>
           </Alert>
-          <Card>
+          <Card className="hidden lg:block">
             <CardHeader>
               <CardTitle className="relative">Nhập thông tin động vật nuôi</CardTitle>
               <CardDescription>Vui lòng nhập thông tin động vật nuôi theo biểu mẫu dưới đây để định danh động vật nuôi.</CardDescription>
@@ -250,12 +255,12 @@ export default function Home() {
       </div>
 
       <div className="mt-6 text-gray-500 text-sm text-center">
-        <div className="flex items-center justify-center gap-1 mb-2">
+        <div className="flex flex-wrap items-center justify-center gap-1 mb-2">
           Made with <IconHeartFilled className="w-4 text-red-600" /> by{' '}
           <a href="https://phuongphung.com?ref=pet.phake.app" target="_blank" className="font-semibold underline">
-            fuongz
+            fuongz.
           </a>
-          . Checkout the source code on{' '}
+          Checkout the source code on{' '}
           <a href="https://github.com/phake-studio/pet" className="font-semibold underline" target="_blank" rel="noopener noreferrer">
             Github
           </a>
