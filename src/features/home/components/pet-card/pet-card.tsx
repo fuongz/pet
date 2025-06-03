@@ -4,49 +4,32 @@ import { Tilt } from '@/components/motion'
 import { formatDate } from 'date-fns'
 import { useHotkeys } from '@/hooks'
 import { useToPng } from '@hugocxl/react-to-image'
-import { Button } from '@/components/ui'
 import { Printer } from 'lucide-react'
-import { useOs } from '@/hooks/use-os/use-os'
 import { useEffect, useState } from 'react'
-import { useMounted } from '@/hooks/use-mounted/use-mounted'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useMounted, useOs } from '@/hooks'
+import { Skeleton, Button } from '@/components/ui'
+import { useAuthStore } from '@/app/auth-provider'
+import { GENDER_ENUM } from '@/constants/gender'
 
 interface Props {
+  petId: string | null
   pet: { dateOfIssue: Date; fullName: string; ownerName: string; hometown: string; gender: string; dateOfBirth: Date; breed: string; avatar: File }
 }
 
-function PetCard({ pet }: Props) {
+function PetCard({ pet, petId }: Props) {
+  const { auth, isAuthenticated } = useAuthStore((store) => store)
   const mounted = useMounted()
-  const [randomNumber, setRandomNumber] = useState<string>('0')
-  const [petId, setPetId] = useState<string | null>(null)
+
   const [avatar, setAvatar] = useState<string | null>(null)
 
   useEffect(() => {
-    if (mounted) {
-      const random = Math.floor(Math.random() * 100000000000)
-        .toString()
-        .padStart(10, '0')
-      setRandomNumber(random)
-    }
-  }, [mounted])
-
-  useEffect(() => {
     if (mounted && pet) {
-      const id = generatePetId()
       if (pet.avatar && pet.avatar.size > 0) {
         setAvatar(URL.createObjectURL(pet.avatar))
       }
-      setPetId(id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pet, randomNumber])
-
-  const generatePetId = () => {
-    const genderCode = pet.gender === 'Male' ? '1' : pet.gender === 'Female' ? '0' : '2'
-    const yearBod = pet.dateOfBirth.getFullYear().toString()
-    const idMask = `C${yearBod}${genderCode}${randomNumber}`
-    return idMask
-  }
+  }, [pet])
 
   const os = useOs()
   const [, convertToSvg, ref] = useToPng<HTMLDivElement>({
@@ -62,7 +45,7 @@ function PetCard({ pet }: Props) {
 
   return (
     <div className="lg:block hidden">
-      <Tilt rotationFactor={8} isReverse>
+      <Tilt rotationFactor={8} className="flex justify-center">
         <div
           ref={ref}
           style={{
@@ -116,7 +99,7 @@ function PetCard({ pet }: Props) {
                     <span className="text-sm text-gray-600 font-medium">Giới tính</span>
                     <span className="text-xs text-gray-400 italic">Gender</span>
                   </div>
-                  <span className="font-semibold text-gray-900 text-left">{pet.gender || 'Chưa có thông tin'}</span>
+                  <span className="font-semibold text-gray-900 text-left">{pet.gender ? GENDER_ENUM[parseInt(pet.gender, 10)] : 'Chưa có thông tin'}</span>
                 </div>
 
                 <div className="flex col-span-3 gap-4 items-start mt-2">
@@ -160,15 +143,17 @@ function PetCard({ pet }: Props) {
         </div>
       </Tilt>
 
-      <Button size="xl" className="mt-12 w-full" onClick={convertToSvg}>
-        <Printer className="-ms-1 me-2 opacity-80" size={16} strokeWidth={2} aria-hidden="true" />
-        In ảnh
-        {os !== 'undetermined' && (
-          <kbd className="-me-1 ms-3 inline-flex h-6 max-h-full items-center rounded border border-zinc-700 bg-zinc-800 px-1.25 font-[inherit] text-sm font-medium text-white/70">
-            {os === 'macos' ? '⌘' : 'Ctrl'}+ I
-          </kbd>
-        )}
-      </Button>
+      <div className="flex justify-center">
+        <Button size="xl" className="mt-12" onClick={convertToSvg}>
+          <Printer className="-ms-1 me-2 opacity-80" size={16} strokeWidth={2} aria-hidden="true" />
+          In ảnh
+          {os !== 'undetermined' && (
+            <kbd className="-me-1 ms-3 inline-flex h-6 max-h-full items-center rounded border border-zinc-700 bg-zinc-800 px-1.25 font-[inherit] text-sm font-medium text-white/70">
+              {os === 'macos' ? '⌘' : 'Ctrl'}+ I
+            </kbd>
+          )}
+        </Button>
+      </div>
     </div>
   )
 }

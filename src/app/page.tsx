@@ -1,26 +1,49 @@
 'use client'
 
-import { Button } from '@/components/ui'
+import {
+  Button,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Calendar,
+  Separator,
+} from '@/components/ui'
 import { CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib'
-import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
-import { useCatBreed } from '@/hooks/use-cat-breed/use-cat-breed'
-import { PetCard } from '@/features/home/components/pet-card/pet-card'
+import { useCatBreed, useMounted } from '@/hooks'
 import { TZDate } from '@date-fns/tz'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { IconHeartFilled } from '@tabler/icons-react'
+import { IconAlertCircleFilled, IconBrandGoogleFilled, IconHeartFilled } from '@tabler/icons-react'
+import { AlertMotion, PetCard } from '@/features/home/components'
+import { signInWithGoogleAction } from './(auth)/actions'
+import { TextShimmer } from '@/components/motion'
+import { useAuthStore } from './auth-provider'
+import { createClient } from '@/lib/supabase/client'
+import { GENDER_ENUM } from '@/constants/gender'
 
 const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+const supabase = createClient()
 
 const formSchema = z.object({
   dateOfIssue: z.date({
@@ -60,6 +83,10 @@ const formSchema = z.object({
 
 export default function Home() {
   const { breeds } = useCatBreed()
+  const { auth, isAuthenticated } = useAuthStore((store) => store)
+  const [petId, setPetId] = useState<string | null>(null)
+  const mounted = useMounted()
+  const [randomNumber, setRandomNumber] = useState<string>('0')
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,7 +95,7 @@ export default function Home() {
     defaultValues: {
       fullName: 'Mây',
       ownerName: 'Phùng Thế Phương',
-      gender: 'Female',
+      gender: '0',
       hometown: 'Thủ Đức, Hồ Chí Minh',
       dateOfBirth: new TZDate(2023, 6, 9, 'Asia/Ho_Chi_Minh'),
       breed: 'British Shorthair',
@@ -80,6 +107,32 @@ export default function Home() {
   const [formValues, setFormValues] = useState<z.infer<typeof formSchema>>(form.getValues())
 
   useEffect(() => {
+    if (mounted) {
+      const random = Math.floor(Math.random() * 100000000000)
+        .toString()
+        .padStart(10, '0')
+      setRandomNumber(random)
+    }
+  }, [mounted])
+
+  const generatePetId = () => {
+    const idType = isAuthenticated ? 'C' : ''
+    const genderInt = parseInt(formValues.gender, 10)
+    const genderCode = GENDER_ENUM[genderInt] === 'Male' ? '1' : GENDER_ENUM[genderInt] === 'Female' ? '0' : '2'
+    const yearBod = formValues.dateOfBirth.getFullYear().toString()
+    const idMask = `${idType}${yearBod}${genderCode}${randomNumber}`
+    return idMask
+  }
+
+  useEffect(() => {
+    if (mounted && formValues) {
+      const id = generatePetId()
+      setPetId(id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValues, randomNumber])
+
+  useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subscription = form.watch((values: any) => {
       setFormValues(values)
@@ -87,34 +140,83 @@ export default function Home() {
     return () => subscription.unsubscribe()
   }, [form])
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data)
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const { avatar, ...rest } = data
+    if (avatar && avatar.size > 0) {
+      const fileType = avatar.type.split('/')[1]
+      const fileName = `${petId}.${fileType}`
+      const { data: uploadedData, error } = await supabase.storage.from('pet-avatars').upload(`${auth?.id}/${Date.now()}-${fileName}`, data.avatar, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+      if (uploadedData || !error) {
+        const newData = {
+          ...rest,
+        }
+        await supabase.from('pets').insert({
+          ...newData,
+          code: petId,
+          authId: auth?.id,
+          avatar: uploadedData.path,
+        })
+      }
+    }
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      setPetId(null)
+      setFormValues(form.getValues())
+    }
+  }
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <TextShimmer>Đang khởi tạo dữ liệu...</TextShimmer>
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-col font-sans bg-violet-50 justify-center items-center lg:h-dvh lg:w-dvw">
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="order-last lg:order-first">
-          <PetCard pet={formValues} />
+          <PetCard petId={petId} pet={formValues} />
         </div>
         <div>
-          <Alert className="mb-4" variant="destructive">
-            <AlertTitle>
-              <div className="flex gap-2 items-center">
-                <span>🚧</span> <span>THÔNG BÁO</span>
+          {!isAuthenticated ? (
+            <form className="mb-4">
+              <AlertMotion variant="success">
+                <div>Đăng nhập để định danh thú cưng của bạn và nhận mã định danh duy nhất.</div>
+                <Button variant="outline" className="mt-2 text-zinc-600" formAction={signInWithGoogleAction}>
+                  <IconBrandGoogleFilled className="me-3 text-[#DB4437] dark:text-white/60" size={16} aria-hidden="true" />
+                  Đăng nhập với Google
+                </Button>
+              </AlertMotion>
+            </form>
+          ) : (
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-2">Đang đăng nhập với tài khoản:</p>
+              <div className="flex items-center gap-2 rounded-md p-2 bg-white shadow-sm">
+                <img src={auth?.user_metadata?.avatar_url || '/default-avatar.png'} alt="Avatar" className="w-8 h-8 rounded-full" />
+                <span className="text-sm font-semibold">{auth?.user_metadata?.full_name || 'No name'}</span>
+                <span className="text-xs text-gray-500">({auth?.email})</span>
+                <form className="ml-auto">
+                  <button onClick={() => signOut()} className="text-sm font-medium hover:underline cursor-pointer text-rose-600">
+                    Đăng xuất
+                  </button>
+                </form>
               </div>
-            </AlertTitle>
-            <AlertDescription>
-              Website đang trong quá trình phát triển, <span className="lg:inline-block hidden">vui lòng nhập thông tin động vật nuôi để định danh.</span>
-              <span className="inline-block lg:hidden"> hiện tại chưa hỗ trợ cho thiết bị di động.</span>
-            </AlertDescription>
-          </Alert>
+            </div>
+          )}
           <Card className="hidden lg:block">
             <CardHeader>
               <CardTitle className="relative">Nhập thông tin động vật nuôi</CardTitle>
               <CardDescription>Vui lòng nhập thông tin động vật nuôi theo biểu mẫu dưới đây để định danh động vật nuôi.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="mt-4">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
@@ -153,16 +255,16 @@ export default function Home() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Giới tính</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Chọn giới tính" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="Female">Female</SelectItem>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
+                              <SelectItem value="0">Female</SelectItem>
+                              <SelectItem value="1">Male</SelectItem>
+                              <SelectItem value="2">Other</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -247,6 +349,12 @@ export default function Home() {
                       </FormItem>
                     )}
                   />
+
+                  {isAuthenticated && (
+                    <Button type="submit" className="w-full">
+                      Đăng ký định danh
+                    </Button>
+                  )}
                 </form>
               </Form>
             </CardContent>
