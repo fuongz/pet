@@ -36,8 +36,6 @@ const AuthStoreProvider = ({ children }: { children: React.ReactNode }) => {
 
     // -- listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event, session)
-
       if (event === 'SIGNED_IN' && session?.user) {
         storeRef.current?.getState().setAuth(session.user)
         storeRef.current?.getState().setIsAuthenticated(true)

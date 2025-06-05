@@ -28,12 +28,27 @@ create policy "Users can insert their own pets"
   to authenticated
   with check (
     (select auth.uid()) = "authId"
-);
+  )
+;
 
 create policy "Users can update own pets."
-  on pets for update 
-  using ((select auth.uid()) = authId);
+on public.pets
+for update 
+to authenticated
+with check (
+  (select auth.uid()) = "authId"
+);
 
-create policy "Auth user can view another pets."
-  on profiles for select
-  using (auth.role() = 'authenticated');
+create policy "Users can update their own pets."
+on public.pets
+for update
+using (auth.uid() = "authId")
+with check (auth.uid() = "authId");
+
+create policy "Anyone can select pets"
+on public.pets
+for select
+to authenticated
+using (
+  (select auth.uid()) = "authId"
+);

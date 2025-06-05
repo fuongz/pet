@@ -1,8 +1,10 @@
+import './globals.css'
 import type { Metadata } from 'next'
 import { Geist_Mono, Space_Grotesk } from 'next/font/google'
-import './globals.css'
 import Script from 'next/script'
-import { AuthStoreProvider } from './auth-provider'
+import { Providers } from './providers'
+import { Toaster } from '@/components/ui'
+import { Footer } from '@/components/shared'
 
 const sans = Space_Grotesk({
   variable: '--font-sans',
@@ -17,7 +19,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Định danh động vật nuôi',
-  description: 'Định danh động vật nuôi',
+  description:
+    'Khám phá những thông tin chi tiết về định danh động vật nuôi, từ phương pháp xác định đến lợi ích và ứng dụng. Cập nhật kiến thức về cách chăm sóc và quản lý thú cưng của bạn hiệu quả hơn.',
 }
 
 export default function RootLayout({
@@ -34,7 +37,9 @@ export default function RootLayout({
         {umamiWebsiteId && <Script defer src="https://cloud.umami.is/script.js" data-website-id={umamiWebsiteId} />}
       </head>
       <body className={`${sans.variable} ${geistMono.variable} antialiased`}>
-        <AuthStoreProvider>{children}</AuthStoreProvider>
+        <Providers>{children}</Providers>
+        <Toaster />
+        <Footer />
       </body>
     </html>
   )
