@@ -92,7 +92,7 @@ const DEFAULT_VALUES = {
     gender: '0',
     hometown: 'Thủ Đức, Hồ Chí Minh',
     dateOfBirth: new TZDate(2023, 6, 9, 'Asia/Ho_Chi_Minh'),
-    breed: 'British Shorthair',
+    breed: 'british-shorthair',
     dateOfIssue: new TZDate(new Date(), 'Asia/Ho_Chi_Minh'),
     avatar: new File([], ''),
   },
@@ -262,8 +262,8 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
           )}
           <Card>
             <CardHeader>
-              <CardTitle className="relative">Nhập thông tin động vật nuôi</CardTitle>
-              <CardDescription>Vui lòng nhập thông tin động vật nuôi theo biểu mẫu dưới đây để định danh động vật nuôi.</CardDescription>
+              <CardTitle className="relative">Nhập thông tin thú cưng</CardTitle>
+              <CardDescription>Vui lòng nhập thông tin thú cưng theo biểu mẫu dưới đây để định danh thú cưng</CardDescription>
             </CardHeader>
             <CardContent className="mt-4">
               <Form {...form}>
@@ -311,9 +311,9 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="0">Female</SelectItem>
-                                <SelectItem value="1">Male</SelectItem>
-                                <SelectItem value="2">Other</SelectItem>
+                                <SelectItem value="0">Cái</SelectItem>
+                                <SelectItem value="1">Đực</SelectItem>
+                                <SelectItem value="2">Khác</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -326,7 +326,7 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
                         name="breed"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Chọn giống</FormLabel>
+                            <FormLabel>Chủng giống</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger className="w-full">
@@ -335,8 +335,8 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
                               </FormControl>
                               <SelectContent>
                                 {breeds.map((breed) => (
-                                  <SelectItem key={breed.key} value={breed.value}>
-                                    {breed.value}
+                                  <SelectItem key={breed.key} value={breed.key}>
+                                    {breed.vietnamese}
                                   </SelectItem>
                                 ))}
                               </SelectContent>

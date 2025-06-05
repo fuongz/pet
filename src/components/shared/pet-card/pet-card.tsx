@@ -2,12 +2,12 @@
 
 import { Tilt } from '@/components/motion'
 import { formatDate } from 'date-fns'
-import { useHotkeys } from '@/hooks'
+import { useCatBreed, useHotkeys } from '@/hooks'
 import { useToPng } from '@hugocxl/react-to-image'
 import { Printer } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMounted, useOs } from '@/hooks'
-import { Button } from '@/components/ui'
+import { Button, Card, CardContent } from '@/components/ui'
 import { GENDER_ENUM } from '@/constants/gender'
 import { useAuthStore } from '@/app/auth-provider'
 import Image from 'next/image'
@@ -21,6 +21,10 @@ function PetCard({ pet, petId }: Props) {
   const { isAuthenticated } = useAuthStore((store) => store)
   const mounted = useMounted()
   const [avatar, setAvatar] = useState<string | null>(null)
+  const { breeds } = useCatBreed()
+  const petBreed = useMemo(() => {
+    return breeds.find((b) => b.key === pet.breed)?.vietnamese || pet.breed
+  }, [pet.breed, breeds])
 
   useEffect(() => {
     if (mounted && pet) {
@@ -54,11 +58,12 @@ function PetCard({ pet, petId }: Props) {
             style={{
               borderRadius: '12px',
             }}
-            className="flex shadow-xl gap-6 relative w-[580px] h-[380px] p-6 pl-10 overflow-hidden bg-white"
+            className="flex shadow-xl gap-6 relative w-[600px] h-[380px] p-6 pl-10 overflow-hidden bg-white"
           >
-            <div className="absolute bg-gradient-to-b from-violet-200 to-pink-200 h-full w-4 left-0 top-0 z-2"></div>
+            <div className="absolute z-2 top-0 right-0 w-32 h-32 bg-rose-300/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute z-2 bottom-0 left-0 w-24 h-24 bg-emerald-400/10 rounded-full translate-y-12 -translate-x-12"></div>
             <div className="absolute opacity-50 bottom-0 left-0 w-full h-full z-1">
-              <img alt="Pet - Background Card" src="/images/card-bg-01.jpg" className="object-cover h-full w-full" />
+              <Image width={600} height={380} alt="Pet - Background Card" src="/images/card-bg-01.jpg" className="object-cover h-full w-full" />
             </div>
             <div className="mt-16 z-2">
               <div className="w-[96px] h-[96px] shadow-xl rounded overflow-hidden">
@@ -114,7 +119,7 @@ function PetCard({ pet, petId }: Props) {
                       <span className="text-sm text-gray-600 font-medium">Giống</span>
                       <span className="text-xs text-gray-400 italic">Breed</span>
                     </div>
-                    <span className="font-semibold text-gray-900 text-left">{pet.breed}</span>
+                    <span className="font-semibold text-gray-900 text-left">{petBreed}</span>
                   </div>
                 </div>
 
@@ -144,8 +149,8 @@ function PetCard({ pet, petId }: Props) {
               </div>
             </div>
 
-            <div className="absolute hidden bottom-6 left-10 z-2">
-              <img alt="QR Code" className="w-[56px]" src="/images/qr-code.png" />
+            <div className="absolute bottom-6 hidden left-10 z-2">
+              <Image width={56} height={56} alt="QR Code" src="/images/qr-code.png" />
             </div>
           </div>
         </Tilt>
@@ -160,6 +165,26 @@ function PetCard({ pet, petId }: Props) {
           )}
         </Button>
       </div>
+
+      <Card className="shadow-sm mt-6 border-0 bg-white/70 backdrop-blur-sm">
+        <CardContent>
+          <h3 className="font-semibold text-gray-900 mb-3">Lưu ý quan trọng</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              Mã định danh chỉ được cấp sau khi đăng ký thông tin thú cưng.
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              Vui lòng cung cấp thông tin chính xác và đầy đủ
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              Hình ảnh thú cưng cần rõ nét và chất lượng cao
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   )
 }

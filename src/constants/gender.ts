@@ -1,7 +1,7 @@
 export enum GENDER_ENUM {
-  'Female',
-  'Male',
-  'Other',
+  'Cái',
+  'Đực',
+  'Khác',
 }
 
 export type TGender = keyof typeof GENDER_ENUM

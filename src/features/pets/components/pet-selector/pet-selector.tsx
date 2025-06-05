@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthStore } from '@/app/auth-provider'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { IconPencil } from '@tabler/icons-react'
 import Image from 'next/image'
 
 interface Props {
@@ -29,19 +28,14 @@ function PetSelector({ pets, className, ...props }: Props & React.ComponentProps
                 {pets &&
                   pets.length > 0 &&
                   pets.map((pet) => (
-                    <div key={pet.code} className="flex items-start shadow-sm gap-2 rounded-md p-2 bg-white border">
+                    <Link href={`/pets/${pet.code}/update`} key={pet.code} className="flex items-start shadow-sm gap-2 rounded-md p-2 hover:bg-zinc-100 transition hover:transition bg-white border">
                       <Image width={48} height={48} src={`${process.env.NEXT_PUBLIC_CDN_URL}/pet-avatars/${pet.avatar}` || '/default-avatar.png'} alt="Avatar" className="rounded-full" />
                       <div className="flex flex-col gap-1 grow-1">
                         <span className="text-sm font-semibold truncate w-[200px]">{pet.fullName || 'No name'}</span>
                         <span className="text-xs text-zinc-500">{pet.code}</span>
                         <span className="text-xs text-zinc-500">{pet.breed}</span>
                       </div>
-                      <Button variant="outline" asChild>
-                        <Link href={`/pets/${pet.code}/update`}>
-                          <IconPencil className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                    </div>
+                    </Link>
                   ))}
               </div>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
