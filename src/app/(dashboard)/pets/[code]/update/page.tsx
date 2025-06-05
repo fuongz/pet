@@ -3,7 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import { UTCDate } from '@date-fns/utc'
 import { notFound } from 'next/navigation'
 
-async function UpdatePetPage({ params }: { params: { code: string } }) {
+interface Props {
+  params: Promise<{ code: string }>
+}
+
+async function UpdatePetPage({ params }: Props) {
   const { code } = await params
   if (!code) return notFound()
   const supabase = await createClient()
