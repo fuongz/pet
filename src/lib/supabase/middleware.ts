@@ -37,14 +37,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (request.nextUrl.pathname !== '/' && !user) {
+  if (request.nextUrl.pathname !== '/' && !request.nextUrl.pathname.startsWith('/share') && !request.nextUrl.pathname.startsWith('/demo') && !user) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
-  if (request.nextUrl.pathname === '/' && user) {
+  if (request.nextUrl.pathname === '/demo' && user) {
     // user is signed in, potentially respond by redirecting the user to the home page
     const url = request.nextUrl.clone()
     url.pathname = '/pets/create'

@@ -1,5 +1,6 @@
 export * from './use-hotkey/use-hot-key'
 export * from './use-cat-breed/use-cat-breed'
+export * from './use-card-theme/use-card-theme'
 export * from './use-isomorphic-effect/use-isomorphic-effect'
 export * from './use-mounted/use-mounted'
 export * from './use-os/use-os'

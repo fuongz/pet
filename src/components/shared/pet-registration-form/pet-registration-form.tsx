@@ -23,6 +23,8 @@ import {
   PopoverContent,
   PopoverTrigger,
   Calendar,
+  FormDescription,
+  Switch,
 } from '@/components/ui'
 import { CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -74,6 +76,7 @@ const formSchema = z.object({
   breed: z.string({
     required_error: 'Vui lòng chọn giống thú cưng.',
   }),
+  publish: z.boolean(),
   avatar: z
     .any()
     .optional()
@@ -95,6 +98,7 @@ const DEFAULT_VALUES = {
     breed: 'british-shorthair',
     dateOfIssue: new TZDate(new Date(), 'Asia/Ho_Chi_Minh'),
     avatar: new File([], ''),
+    publish: false,
   },
   create: {
     fullName: '',
@@ -105,6 +109,7 @@ const DEFAULT_VALUES = {
     breed: '',
     dateOfIssue: new TZDate(new Date(), 'Asia/Ho_Chi_Minh'),
     avatar: new File([], ''),
+    publish: false,
   },
 }
 
@@ -155,11 +160,12 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
       toast.error('Vui lọc nhập thống tin cơ bản')
       return
     }
-    const { avatar, ...rest } = data
+    const { avatar, publish, ...rest } = data
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let newData: any = {
       ...rest,
+      publish: publish ? 1 : 0,
       gender: parseInt(data.gender, 10),
       dateOfBirth: formatDate(data.dateOfBirth, 'dd/MM/yyyy'),
     }
@@ -222,8 +228,8 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
   }
 
   return (
-    <div className="flex flex-col font-sans py-6 bg-violet-50 justify-center items-center min-h-svh min-w-svw">
-      <div className="lg:container relative mx-auto px-4 flex flex-wrap gap-6 w-full justify-center items-center">
+    <div className="flex flex-col font-sans py-6 justify-center items-center">
+      <div className="lg:container relative mx-auto px-4 flex flex-wrap gap-6 w-full justify-center">
         <div className="col-span-2 md:col-span-1">
           {!isAuthenticated ? (
             <form className="mb-4">
@@ -260,7 +266,7 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
               </div>
             </div>
           )}
-          <Card>
+          <Card className="max-w-[500px]">
             <CardHeader>
               <CardTitle className="relative">Nhập thông tin thú cưng</CardTitle>
               <CardDescription>Vui lòng nhập thông tin thú cưng theo biểu mẫu dưới đây để định danh thú cưng</CardDescription>
@@ -410,6 +416,24 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
                     )}
                   />
 
+                  {action === 'update' && (
+                    <FormField
+                      control={form.control}
+                      name="publish"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row justify-between rounded-lg gap-6">
+                          <div className="space-y-2">
+                            <FormLabel>Trạng thái</FormLabel>
+                            <FormDescription>Nếu trạng thái là công khai, tất cả mọi người có thể xem thẻ định danh thú cưng này.</FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
                   {viewAs === 'authenticated' && action === 'create' && (
                     <Button size="lg" type="submit" disabled={form.formState.isSubmitting} className="w-full mt-4">
                       {form.formState.isSubmitting ? <IconLoader2 className="mr-2 h-4 w-4 animate-spin" /> : <IconUserScan className="mr-2 h-4 w-4" />}
@@ -430,7 +454,7 @@ function PetRegistrationForm({ viewAs = 'guest', action = 'create', pet = null }
         </div>
 
         <div className="overflow-hidden md:overflow-visible">
-          <PetCard petId={pet?.code || null} pet={formValues} />
+          <PetCard petId={pet?.code || null} pet={formValues} action={action} />
         </div>
       </div>
     </div>

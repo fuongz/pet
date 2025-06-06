@@ -15,6 +15,7 @@ create table if not exists pets (
   avatar character varying null,
   authId uuid not null,
   code character varying not null,
+  publish smallint null,
 
   constraint pets_pkey primary key (id),
   constraint pets_code_key unique (code),
@@ -52,3 +53,9 @@ to authenticated
 using (
   (select auth.uid()) = "authId"
 );
+
+create policy "Guest can read pets if published"
+on public.pets
+for select
+to anon
+using (publish = 1);

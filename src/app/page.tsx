@@ -1,7 +1,7 @@
-import { PetRegistrationForm } from '@/components/shared/pet-registration-form/pet-registration-form'
+import { Hero } from '@/features/home/components'
 
 function HomePage() {
-  return <PetRegistrationForm viewAs="guest" action="create" />
+  return <Hero />
 }
 
 export default HomePage

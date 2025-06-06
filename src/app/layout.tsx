@@ -37,7 +37,9 @@ export default function RootLayout({
         {umamiWebsiteId && <Script defer src="https://cloud.umami.is/script.js" data-website-id={umamiWebsiteId} />}
       </head>
       <body className={`${sans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <main className="pb-32 bg-violet-50 justify-center items-center min-h-svh min-w-svw">
+          <Providers>{children}</Providers>
+        </main>
         <Toaster />
         <Footer />
       </body>
