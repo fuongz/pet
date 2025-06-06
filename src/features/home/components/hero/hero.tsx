@@ -1,3 +1,4 @@
+import { Tilt } from '@/components/motion'
 import { Badge, Button } from '@/components/ui'
 import { IconBrandGithub } from '@tabler/icons-react'
 import { ArrowUpRight } from 'lucide-react'
@@ -30,8 +31,10 @@ const Hero = () => {
             </Button>
           </div>
         </div>
-        <div className="relative lg:max-w-lg xl:max-w-xl w-full bg-accent rounded-xl aspect-square">
-          <Image src="/placeholder.svg" fill alt="" className="object-cover rounded-xl" />
+        <div className="relative lg:max-w-lg xl:max-w-xl w-full">
+          <Tilt rotationFactor={8}>
+            <Image width={600} height={380} src="/images/card-sample.jpeg" alt="" className="object-cover rounded-xl" />
+          </Tilt>
         </div>
       </div>
     </div>
